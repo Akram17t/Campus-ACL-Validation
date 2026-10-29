@@ -1,20 +1,17 @@
-# Rencana pengujian compiler dan checker
+# Pengujian
 
-Tambahkan unit test saat logika inti diimplementasikan:
-
-- Compiler: YAML dibaca dengan aman; referensi, subnet, port, dan ID tidak valid ditolak.
-- Compiler: urutan aturan terjaga, layanan multi-protokol diekspansi, default deny tersedia.
-- Checker: konflik, shadowing penuh, redundansi, dan aturan yang tidak beririsan.
-
-Gunakan fixture kebijakan kecil yang memperlihatkan satu perilaku per kasus.
-Belum ada unit test compiler/checker yang dapat dijalankan. Pengujian jaringan
-end-to-end direncanakan di `experiments/` setelah topologi dan deployer tersedia.
-
-Pemeriksaan statis topologi dasar sudah tersedia di `test_topology.py`:
+Jalankan dari root repo setelah menginstal `requirements.txt`:
 
 ```bash
-python -B -m unittest discover -s tests -p test_topology.py -v
+python -B -m unittest discover -s tests -v
 ```
 
-Pengujian ini memeriksa konsistensi konfigurasi tanpa menjalankan Containerlab;
-tidak menggantikan build image dan pengujian routing pada lab.
+- `test_compiler.py`: input contoh, urutan aturan, YAML aman, key/ID duplikat,
+  format dokumen, versi, VLAN/subnet/gateway, layanan/protokol/port, serta
+  referensi dan tindakan aturan. Setiap kasus tidak valid memeriksa kode/lokasi error.
+- `test_topology.py`: konsistensi link, VLAN access/trunk, IP/gateway, routing,
+  dan ketiadaan pemasangan ACL saat startup.
+
+Belum ada pengujian rendering ACL atau checker karena implementasinya belum
+tersedia. Tes ini tidak menjalankan Containerlab atau membuktikan enforcement
+jaringan; pengujian end-to-end dilanjutkan melalui `experiments/`.

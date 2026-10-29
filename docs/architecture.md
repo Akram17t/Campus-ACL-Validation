@@ -1,7 +1,8 @@
 # Spesifikasi kebijakan dan alur validasi ACL
 
-Dokumen ini adalah acuan implementasi versi 1. Modul Python masih berupa kerangka;
-format keluaran di bawah adalah kontrak yang direncanakan, bukan hasil uji jaringan.
+Dokumen ini adalah acuan implementasi versi 1. Pembacaan dan validasi YAML sudah
+tersedia; rendering ACL, checker, deployer, dan verifier belum diimplementasikan.
+Format laporan keluaran di bawah adalah kontrak berikutnya, bukan hasil uji jaringan.
 
 ## Status backend router
 
@@ -19,7 +20,7 @@ build image, dan sumber resmi dicatat di [rencana topologi](../topology/README.m
 
 Definisi image dan topologi dasar tersedia pada `topology/`, tanpa pemasangan ACL.
 Keduanya sudah diperiksa secara statis, tetapi belum dibangun/dijalankan pada lab;
-modul ACL masih berupa kerangka. Deployment berstatus `blocked` sampai image,
+rendering dan penerapan ACL belum tersedia. Deployment berstatus `blocked` sampai image,
 topologi, akses target, dan dukungan kernel untuk VLAN/nftables/conntrack lolos
 pemeriksaan kesiapan.
 Jangan mengganti backend atau memperlonggar kebijakan otomatis jika prasyarat gagal.
@@ -58,12 +59,24 @@ Compiler dan checker bekerja tanpa koneksi router. Compiler memvalidasi input
 sebelum checker menganalisis match terurai. Keduanya harus lolos sebelum rendering
 ACL native dan deployment. Kompilasi tidak sekaligus memasang aturan.
 
+API tahap pembacaan adalah `src.compiler.load_inputs(policy_path, inventory_path)`.
+Fungsi membaca serta memvalidasi inventaris lebih dulu, lalu kebijakan, dan
+mengembalikan tuple `(policy, inventory)` dengan data dan urutan aturan tetap sama.
+Tidak ada penguraian layanan, analisis konflik, atau rendering ACL pada tahap ini.
+
+Kesalahan pertama menghentikan proses dengan `src.compiler.ValidationError`,
+turunan `ValueError` yang menyediakan `code`, `location`, dan `message`. Bentuk
+string-nya adalah `lokasi: [kode] alasan`. Lokasi berisi path file dan field;
+kesalahan sintaks/key YAML menyertakan baris serta kolom jika tersedia. Belum ada
+file laporan JSON yang ditulis oleh validator.
+
 ## Format input YAML versi 1
 
 Kedua file berupa mapping dengan `schema_version: 1` (integer). Baca menggunakan
 `yaml.safe_load`, lalu validasi struktur dan field. Loader juga harus menolak key
 YAML duplikat; `safe_load` saja belum menjamin pemeriksaan tersebut. Tolak field
 tidak dikenal, field wajib yang hilang, dan versi yang tidak didukung.
+Key mapping wajib string dan merge key YAML (`<<`) tidak didukung.
 
 Semua field pada tabel wajib ada. String tidak boleh kosong atau memiliki spasi
 awal/akhir; nama layanan dan ID aturan peka huruf besar/kecil. Integer tidak boleh

@@ -9,9 +9,10 @@ jaringan sesuai dengan kebijakan tersebut.
 
 ## Status
 
-Repositori ini berisi struktur awal, contoh konfigurasi, dan rancangan alur kerja.
-Compiler ACL, checker aturan, deployer router, dan verifier Scapy belum
-diimplementasikan. Contoh kebijakan belum dapat diterapkan ke jaringan.
+Pembacaan dan validasi kebijakan YAML sudah tersedia di `src/compiler.py`,
+beserta contoh konfigurasi dan topologi dasar. Rendering ACL router, checker
+konflik/shadowing, deployer, dan verifier Scapy belum diimplementasikan.
+Kebijakan belum dapat diterapkan ke jaringan.
 
 ## Struktur repositori
 
@@ -55,14 +56,30 @@ router Linux Debian 13 + nftables dengan image lokal `campus-acl-router:1.0` dan
 deployment melalui Docker exec. Definisi image dan topologi dasar sudah tersedia;
 ikuti panduan build, startup, uji routing, dan teardown di `topology/README.md`.
 
-Pemeriksaan struktur awal:
+## Validasi input dan pengujian
+
+Setelah memasang `requirements.txt`, jalankan seluruh unit test:
 
 ```powershell
-python -m compileall -q src
+python -B -m unittest discover -s tests -v
 ```
 
-Perintah tersebut hanya memeriksa sintaks Python, belum memvalidasi semantik kebijakan.
-Belum tersedia CLI maupun pengujian otomatis fungsional.
+Pembacaan input dari Python:
+
+```python
+from src.compiler import ValidationError, load_inputs
+
+try:
+    policy, inventory = load_inputs("policies/campus.yaml", "topology/vlans.yaml")
+except ValidationError as error:
+    print(error)  # Memuat file/field, kode, dan alasan kesalahan.
+```
+
+`load_inputs` mengembalikan `(policy, inventory)` tanpa mengubah data atau urutan
+aturan. Validator berhenti pada kesalahan pertama, termasuk file tidak terbaca,
+YAML tidak valid, key duplikat, dan pelanggaran format versi 1. Fungsi ini belum
+menghasilkan ACL atau memeriksa konflik/shadowing. Tes berjalan tanpa Docker dan
+tidak membuktikan konektivitas jaringan. Belum tersedia CLI proyek.
 
 ## Contoh kebijakan
 
@@ -77,7 +94,7 @@ Semantik aturan dan batas cakupan dijelaskan di [arsitektur](docs/architecture.m
 
 ## Tahapan implementasi
 
-1. Buat compiler untuk membaca YAML, memvalidasi input, dan menghasilkan ACL.
+1. Pembacaan dan validasi YAML sudah tersedia; berikutnya lengkapi compiler ACL.
 2. Buat checker untuk mendeteksi konflik dan aturan yang tertutupi.
 3. Siapkan topologi Containerlab dan deployer untuk router yang dipilih.
 4. Buat verifier Scapy dan skenario eksperimen akses yang diizinkan/ditolak.
