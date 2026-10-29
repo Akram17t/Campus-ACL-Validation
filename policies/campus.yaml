@@ -1,0 +1,30 @@
+schema_version: 1
+default_action: deny
+services:
+  https:
+    - protocol: tcp
+      destination_port: 443
+  dns:
+    - protocol: udp
+      destination_port: 53
+    - protocol: tcp
+      destination_port: 53
+  mqtt:
+    - protocol: tcp
+      destination_port: 1883
+rules:
+  - id: staff-https
+    source_vlan: 10
+    destination_vlan: 40
+    service: https
+    action: allow
+  - id: guest-dns
+    source_vlan: 20
+    destination_vlan: 40
+    service: dns
+    action: allow
+  - id: iot-mqtt
+    source_vlan: 30
+    destination_vlan: 40
+    service: mqtt
+    action: allow

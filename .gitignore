@@ -21,5 +21,8 @@ Thumbs.db
 *.log
 
 # Artefak hasil kompilasi dan pengujian
-/outputs/*
-!/outputs/.gitkeep
+/results/*
+!/results/.gitkeep
+
+# Direktori runtime Containerlab
+clab-*/

@@ -5,7 +5,7 @@ Dokumen ini mendefinisikan rancangan awal; belum ada enforcement jaringan.
 ## Alur data
 
 ```text
-Inventaris VLAN + kebijakan JSON
+Inventaris VLAN + kebijakan YAML
               |
               v
      Pembacaan dan validasi
@@ -17,28 +17,30 @@ Inventaris VLAN + kebijakan JSON
          Kompilasi ACL
               |
               v
- Pemasangan aturan melalui backend SDN
+ Deployer -> router pada Containerlab
               |
               v
- Probe akses -> hasil aktual vs ekspektasi -> laporan
+ Verifier Scapy -> hasil aktual vs ekspektasi -> results/
 ```
 
 ## Tanggung jawab modul
 
 | Modul | Masukan | Keluaran yang direncanakan |
 | --- | --- | --- |
-| `policy.py` | Inventaris VLAN dan kebijakan JSON | Kebijakan tervalidasi atau kesalahan input |
-| `analyzer.py` | Aturan kebijakan yang terurut | Temuan konflik, redundansi, dan shadowing beserta ID aturan |
-| `compiler.py` | Kebijakan yang sudah lolos pemeriksaan | ACL untuk backend yang dipilih |
-| `probes.py` | Skenario layanan dan akses host uji | Ekspektasi, hasil aktual, dan status pengujian |
+| `src/compiler.py` | Inventaris VLAN dan kebijakan YAML | Aturan ACL terurut atau kesalahan validasi input |
+| `src/checker.py` | Aturan kebijakan yang terurut | Temuan konflik, redundansi, dan shadowing beserta ID aturan |
+| `src/deployer.py` | ACL yang sudah lolos pemeriksaan dan koneksi router | Status pemasangan aturan |
+| `src/verifier.py` | Skenario layanan dan akses host uji | Ekspektasi, hasil aktual, dan pengukuran paket dengan Scapy |
 
-Integrasi pemasangan aturan ditambahkan setelah controller dan format ACL
+Compiler membaca YAML menggunakan `yaml.safe_load` dan memvalidasi kebijakan
+sebelum checker menganalisis aturan. Keduanya harus lolos sebelum deployment.
+Integrasi pemasangan aturan ditambahkan setelah image router dan format ACL
 ditentukan. Kompilasi dan pemasangan aturan merupakan dua langkah terpisah.
 
 ## Semantik contoh kebijakan
 
 - `schema_version` bernilai `1` untuk rancangan format awal ini.
-- VLAN dirujuk dengan ID numerik yang terdapat dalam `configs/vlans.json`.
+- VLAN dirujuk dengan ID numerik yang terdapat dalam `topology/vlans.yaml`.
 - Layanan merupakan daftar pasangan protokol (`tcp`/`udp`) dan port tujuan.
 - Aturan berlaku dari subnet VLAN sumber menuju subnet VLAN tujuan.
 - `rules` dievaluasi dari atas ke bawah; aturan pertama yang cocok menentukan
@@ -68,7 +70,7 @@ Analisis membandingkan cakupan match dan urutan aturan:
 
 Temuan perlu menunjukkan ID aturan terkait dan contoh trafik yang terdampak.
 Kriteria temuan yang menghentikan kompilasi ditentukan bersama implementasi
-analyzer, sebelum pemasangan aturan diaktifkan.
+checker, sebelum pemasangan aturan diaktifkan.
 
 ## Pengujian jaringan
 
@@ -81,5 +83,6 @@ untuk menyimpulkan bahwa ACL berhasil memblokir: layanan mati dan routing rusak
 juga dapat menyebabkan timeout. Laporan harus membedakan `pass`, `fail`, dan
 kesalahan lingkungan uji, serta mencatat aturan dan probe yang relevan.
 
-Simpan ACL hasil kompilasi dan laporan di `outputs/`. Jangan memasukkan kredensial
-controller atau data jaringan nyata ke contoh konfigurasi.
+Skenario dan skrip eksperimen ditempatkan di `experiments/`. Simpan ACL hasil
+kompilasi, hasil pengukuran, dan laporan lokal di `results/`. Jangan memasukkan
+kredensial router atau data jaringan nyata ke contoh konfigurasi.

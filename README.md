@@ -10,30 +10,33 @@ jaringan sesuai dengan kebijakan tersebut.
 ## Status
 
 Repositori ini berisi struktur awal, contoh konfigurasi, dan rancangan alur kerja.
-Compiler ACL, analisis aturan, integrasi controller, dan probe jaringan belum
+Compiler ACL, checker aturan, deployer router, dan verifier Scapy belum
 diimplementasikan. Contoh kebijakan belum dapat diterapkan ke jaringan.
 
 ## Struktur repositori
 
 ```text
 .
-├── .github/workflows/ci.yml  # Pemeriksaan dasar Python dan contoh JSON
-├── configs/vlans.json       # Inventaris VLAN dan subnet kampus
-├── policies/campus.json     # Contoh kebijakan akses antar-VLAN
-├── docs/architecture.md     # Kontrak modul dan tahapan implementasi
-├── src/campus_acl/
-│   ├── __init__.py
-│   ├── policy.py            # Pembacaan dan validasi kebijakan
-│   ├── compiler.py          # Penerjemahan kebijakan menjadi ACL
-│   ├── analyzer.py          # Deteksi konflik dan shadowing
-│   └── probes.py            # Pengujian konektivitas dan pelaporan
-├── topologies/              # Rencana lingkungan emulasi jaringan
-├── tests/
-│   ├── unit/               # Rencana pengujian logika inti
-│   └── integration/        # Rencana pengujian jaringan
-├── outputs/                 # Hasil ACL dan laporan lokal (diabaikan Git)
-└── pyproject.toml
+├── README.md
+├── requirements.txt
+├── .gitignore
+├── topology/               # Topologi Containerlab dan konfigurasi router
+│   ├── README.md
+│   └── vlans.yaml          # Inventaris VLAN dan subnet kampus
+├── policies/
+│   └── campus.yaml         # Kebijakan akses dalam YAML
+├── src/
+│   ├── compiler.py         # Kebijakan -> aturan ACL
+│   ├── checker.py          # Deteksi konflik dan shadowing
+│   ├── deployer.py         # Terapkan aturan ke router
+│   └── verifier.py         # Pengujian paket dengan Scapy
+├── tests/                  # Pengujian compiler dan checker
+├── experiments/            # Skenario dan skrip eksperimen
+├── results/                # Hasil pengukuran lokal (diabaikan Git)
+└── docs/                   # Diagram dan dokumentasi
 ```
+
+CI di `.github/workflows/ci.yml` memeriksa sintaks Python dan contoh YAML.
 
 ## Persiapan pengembangan
 
@@ -42,23 +45,23 @@ Gunakan Python 3.11 atau lebih baru. Dari direktori repositori:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -e .
+python -m pip install -r requirements.txt
 ```
 
-Paket inti belum memiliki dependensi runtime. Lingkungan controller dan emulator
-akan ditentukan saat integrasi jaringan dibuat; direktori `topologies/` mencatat
-rencana penggunaan Mininet dan Open vSwitch pada Linux.
+Dependensi awal adalah PyYAML untuk membaca kebijakan dan Scapy untuk pengujian
+paket. Containerlab beserta container runtime disiapkan terpisah pada lingkungan
+Linux; lihat [rencana topologi](topology/README.md). Image router dan mekanisme
+deployment ACL belum ditentukan.
 
 Pemeriksaan struktur awal:
 
 ```powershell
 python -m compileall -q src
-python -m json.tool configs/vlans.json
-python -m json.tool policies/campus.json
 ```
 
-Perintah tersebut hanya memeriksa sintaks Python dan JSON, bukan kebenaran ACL
-atau perilaku jaringan. Belum tersedia CLI maupun pengujian otomatis fungsional.
+Perintah tersebut hanya memeriksa sintaks Python. CI juga membaca contoh YAML
+dengan `yaml.safe_load`; pemeriksaan ini belum memvalidasi semantik kebijakan.
+Belum tersedia CLI maupun pengujian otomatis fungsional.
 
 ## Contoh kebijakan
 
@@ -73,8 +76,8 @@ Semantik aturan dan batas cakupan dijelaskan di [arsitektur](docs/architecture.m
 
 ## Tahapan implementasi
 
-1. Validasi inventaris VLAN, layanan, dan aturan kebijakan.
-2. Analisis konflik serta aturan yang tertutupi berdasarkan urutan evaluasi.
-3. Kompilasi aturan ke backend ACL/controller yang dipilih.
-4. Siapkan topologi dan pemasangan aturan pada lingkungan emulasi.
-5. Jalankan skenario akses yang diizinkan dan ditolak, lalu hasilkan laporan.
+1. Buat compiler untuk membaca YAML, memvalidasi input, dan menghasilkan ACL.
+2. Buat checker untuk mendeteksi konflik dan aturan yang tertutupi.
+3. Siapkan topologi Containerlab dan deployer untuk router yang dipilih.
+4. Buat verifier Scapy dan skenario eksperimen akses yang diizinkan/ditolak.
+5. Simpan hasil pengukuran di `results/` dan dokumentasikan evaluasinya.
