@@ -22,6 +22,8 @@ diimplementasikan. Contoh kebijakan belum dapat diterapkan ke jaringan.
 ├── .gitignore
 ├── topology/               # Topologi Containerlab dan konfigurasi router
 │   ├── README.md
+│   ├── Dockerfile          # Image Linux dengan tool routing dan nftables
+│   ├── campus.clab.yml     # Router, switch VLAN, dan empat host uji
 │   └── vlans.yaml          # Inventaris VLAN dan subnet kampus
 ├── policies/
 │   └── campus.yaml         # Kebijakan akses dalam YAML
@@ -35,8 +37,6 @@ diimplementasikan. Contoh kebijakan belum dapat diterapkan ke jaringan.
 ├── results/                # Hasil pengukuran lokal (diabaikan Git)
 └── docs/                   # Diagram dan dokumentasi
 ```
-
-CI di `.github/workflows/ci.yml` memeriksa sintaks Python dan contoh YAML.
 
 ## Persiapan pengembangan
 
@@ -52,7 +52,8 @@ Dependensi awal adalah PyYAML untuk membaca kebijakan dan Scapy untuk pengujian
 paket. Containerlab beserta container runtime disiapkan terpisah pada lingkungan
 Linux; lihat [rencana topologi](topology/README.md). Backend yang dipilih adalah
 router Linux Debian 13 + nftables dengan image lokal `campus-acl-router:1.0` dan
-deployment melalui Docker exec. Image turunan dan topologi belum dibangun.
+deployment melalui Docker exec. Definisi image dan topologi dasar sudah tersedia;
+ikuti panduan build, startup, uji routing, dan teardown di `topology/README.md`.
 
 Pemeriksaan struktur awal:
 
@@ -60,8 +61,7 @@ Pemeriksaan struktur awal:
 python -m compileall -q src
 ```
 
-Perintah tersebut hanya memeriksa sintaks Python. CI juga membaca contoh YAML
-dengan `yaml.safe_load`; pemeriksaan ini belum memvalidasi semantik kebijakan.
+Perintah tersebut hanya memeriksa sintaks Python, belum memvalidasi semantik kebijakan.
 Belum tersedia CLI maupun pengujian otomatis fungsional.
 
 ## Contoh kebijakan

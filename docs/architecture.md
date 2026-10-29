@@ -11,16 +11,17 @@ build image, dan sumber resmi dicatat di [rencana topologi](../topology/README.m
 
 | Parameter | Nilai |
 | --- | --- |
-| Image router lokal yang akan dibangun | `campus-acl-router:1.0` |
+| Image router lokal | `campus-acl-router:1.0` dari `topology/Dockerfile` |
 | Base image | `debian:trixie-20261027-slim` |
 | `access_method` | `docker_exec` pada host lab Linux |
 | `return_traffic_mode` | `conntrack_reply` |
 | ACL native | File nftables `results/acl.nft`, table IPv4 `campus_acl` |
 
-Ini keputusan desain; image turunan, topologi, dan modul belum diimplementasikan
-atau diuji. Validasi, checker, dan pengembangan compiler dapat dilanjutkan dengan
-profil ini. Deployment berstatus `blocked` sampai image, topologi, akses target,
-dan dukungan kernel untuk VLAN/nftables/conntrack lolos pemeriksaan kesiapan.
+Definisi image dan topologi dasar tersedia pada `topology/`, tanpa pemasangan ACL.
+Keduanya sudah diperiksa secara statis, tetapi belum dibangun/dijalankan pada lab;
+modul ACL masih berupa kerangka. Deployment berstatus `blocked` sampai image,
+topologi, akses target, dan dukungan kernel untuk VLAN/nftables/conntrack lolos
+pemeriksaan kesiapan.
 Jangan mengganti backend atau memperlonggar kebijakan otomatis jika prasyarat gagal.
 
 ## Alur data
