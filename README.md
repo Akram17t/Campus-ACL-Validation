@@ -50,8 +50,9 @@ python -m pip install -r requirements.txt
 
 Dependensi awal adalah PyYAML untuk membaca kebijakan dan Scapy untuk pengujian
 paket. Containerlab beserta container runtime disiapkan terpisah pada lingkungan
-Linux; lihat [rencana topologi](topology/README.md). Image router dan mekanisme
-deployment ACL belum ditentukan.
+Linux; lihat [rencana topologi](topology/README.md). Backend yang dipilih adalah
+router Linux Debian 13 + nftables dengan image lokal `campus-acl-router:1.0` dan
+deployment melalui Docker exec. Image turunan dan topologi belum dibangun.
 
 Pemeriksaan struktur awal:
 

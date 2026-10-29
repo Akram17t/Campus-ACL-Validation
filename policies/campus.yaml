@@ -1,4 +1,6 @@
+# Kontrak field dan keluaran: docs/architecture.md (versi 1).
 schema_version: 1
+# Akses antar-VLAN di luar match eksplisit ditolak.
 default_action: deny
 services:
   https:
@@ -12,6 +14,8 @@ services:
   mqtt:
     - protocol: tcp
       destination_port: 1883
+# First-match: urutan list menentukan tindakan, bukan tingkat spesifik aturan.
+# Allow menyatakan izin inisiasi layanan; mekanisme balasan mengikuti profil router.
 rules:
   - id: staff-https
     source_vlan: 10
