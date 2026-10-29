@@ -1,0 +1,25 @@
+# Python dan lingkungan lokal
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Konfigurasi lokal dan editor
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+*.log
+
+# Artefak hasil kompilasi dan pengujian
+/outputs/*
+!/outputs/.gitkeep
